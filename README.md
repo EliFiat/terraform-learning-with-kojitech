@@ -9,3 +9,20 @@
 ## terraform console
 
 ## resource_name.local_name
+
+## data types 
+
+# """"""
+
+# " " :> string
+# [] = list 
+# 80 = number 
+# bool = true/false 
+# {}  =  map 
+
+# ### complicated
+# [""] => list(string)
+# [{}] => list(map)
+# {[]} => map(list)
+# """""
+
