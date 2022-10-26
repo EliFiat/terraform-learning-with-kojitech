@@ -5,3 +5,7 @@
   - terraform plan
   - terraform apply
   - terraform destroy
+
+## terraform console
+
+## resource_name.local_name

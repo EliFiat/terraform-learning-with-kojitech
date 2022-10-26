@@ -43,13 +43,58 @@ resource "aws_vpc" "main" {
 
 ## data source ( to pull down existing resources)
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+## DATA SOURCE
+resource "aws_subnet" "public_subnet1" {
+  vpc_id     = local.main_vpc_id
+  cidr_block = var.subnet_cidr[0]
+  availability_zone = data.aws_availability_zones.available.names[0]
+}
+
+resource "aws_subnet" "public_subnet2" {
+  vpc_id     = local.main_vpc_id
+  cidr_block = var.subnet_cidr[1]
+  availability_zone = data.aws_availability_zones.available.names[1]
+
+}
+
+resource "aws_subnet" "private_subnet1" {
+  vpc_id     = local.main_vpc_id
+  cidr_block = var.subnet_cidr[2]
+  availability_zone = data.aws_availability_zones.available.names[0]
+
+}
+
+resource "aws_subnet" "private_subnet2" {
+  vpc_id     = local.main_vpc_id
+  cidr_block = var.subnet_cidr[3]
+  availability_zone = data.aws_availability_zones.available.names[1]
+
+}
+
+resource "aws_subnet" "private_subnet3" {
+  vpc_id     = local.main_vpc_id
+  cidr_block = var.subnet_cidr[4]
+  availability_zone = data.aws_availability_zones.available.names[0]
+
+}
+
+resource "aws_subnet" "private_subnet4" {
+  vpc_id     = local.main_vpc_id
+  cidr_block = var.subnet_cidr[5]
+  availability_zone = data.aws_availability_zones.available.names[1]
+
+}
 
 
 
 ## Creating ec2
          #local_name   #resource_name
 resource "aws_instance" "ec2_instance" {
-  ami           = var.ami_id  
+  ami           = data.aws_ami.ami.id  
   instance_type = var.instance_type
 
   tags = {
@@ -63,4 +108,23 @@ resource "aws_instance" "ec2_instance" {
 
 
 # bash git-command.sh
+
+
+# create variable for subnet cidr_block
+# use data source to pull down available ami
+# put vpc in locals
+
+data "aws_ami" "ami" {
+  most_recent      = true
+  owners           = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm*"]
+  }
+}
+
+locals {
+  main_vpc_id     = aws_vpc.main.id
+}
 
