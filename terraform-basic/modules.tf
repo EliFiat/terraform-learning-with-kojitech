@@ -6,13 +6,18 @@
 ## public vpc module
 ## modules are dynamic
 
+locals {
+  main_vpc_id     = module.vpc.vpc_id
+  azs = data.aws_availability_zones.available.names
+}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = "main"
   cidr = "10.0.0.0/16"
 
-  azs             = data.aws_availability_zones.available.names   # data source
+  azs             = slice(data.aws_availability_zones.available.names, 0,3)   # data source
   private_subnets = var.private_subnets  # list variable
   public_subnets  = var.public_subnets # list variable
 
@@ -48,16 +53,21 @@ data "aws_availability_zones" "available" {
 
 data "aws_ami" "ami" {
   most_recent      = true
-  owners           = ["amazon"]
+  owners           = ["amazon"] # for golden ami you put "self"
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-hvm*"]
+    values = ["amzn2-ami-kernel-5.10-hvm-*-gp2"]
+  }
+
+  filter {
+    name   = "root-device-type"
+    values = ["ebs"]
   }
 }
 
 ## Creating ec2
-         #local_name   #resource_name
+         #resource_name   #local_name
 resource "aws_instance" "ec2_instance" {
   ami           = data.aws_ami.ami.id  
   instance_type = var.instance_type
@@ -68,9 +78,48 @@ resource "aws_instance" "ec2_instance" {
 }
 
 
+# resource "aws_subnet" "private" {
+#   count = length(var.private_subnets)
+#   vpc_id     = local.main_vpc_id
+#   cidr_block = var.private_subnets[count.index]
+#   availability_zone = element(slice(local.azs, 0,2), count.index)
+# }
+
+# resource "aws_subnet" "public" {
+#   count = length(var.public_subnets)
+#   vpc_id     = local.main_vpc_id
+#   cidr_block = var.private_subnets[count.index]
+#   availability_zone = element(slice(local.azs, 0,2), count.index)
+# }
+
+
 
 ## output the  vpc_id that was created
 
+## Functions 
+### slice() 
+### length
+### element()
 
+## output the subnet_ids
+
+## use element to achieve this
+## ["us-east-1a", "us-east-1b", "us-east-1a", "us-east-1b", "us-east-1a", "us-east-1b"]
+## ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+
+# #private subnet without count 
+# output "private_subnet_id" {
+#    value = aws_subnet.private.id # didn't use count
+# }
+
+# ##( legacy splat operator)
+# output "private_subnet_id" {
+#    value = aws_subnet.private.*.id # didn't use count
+# }
+
+# ## latest splat operator
+# output "private_subnet_id" {
+#    value = aws_subnet.private[*].id
+# }
 
 

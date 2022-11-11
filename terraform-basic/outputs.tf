@@ -25,4 +25,11 @@ output "vpc_id" {
    value = module.vpc.vpc_id  ##since we are using module we have to call the module the source  + resource name and the logical name.to get logical name go to main.tf of the root module.
 }
 
+output "public_subnets_id" {
+   value = module.vpc.public_subnets
+}
+
+output "private_subnets_id" {
+   value = module.vpc.private_subnets
+}
 
